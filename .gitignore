@@ -128,4 +128,4 @@ nb-configuration.xml
 # Codeigniter
 app/Config/Database.php
 .env
-/App.php
+app/Config/App.php
