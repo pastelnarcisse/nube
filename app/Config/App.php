@@ -23,7 +23,7 @@ class App extends BaseConfig
      *
      * @var string
      */
-    public $baseURL = 'https://nube.narcisse.mx/';
+    public $baseURL = 'http://localhost/narcisse/nube/';
 
     /**
      * --------------------------------------------------------------------------
