@@ -126,6 +126,6 @@ nb-configuration.xml
 
 
 # Codeigniter
-/Database.php
+app/Config/Database.php
 .env
 /App.php
