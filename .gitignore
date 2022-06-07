@@ -129,3 +129,8 @@ nb-configuration.xml
 app/Config/Database.php
 .env
 app/Config/App.php
+
+# SUBLIME TEX FTP
+/sftp-config.json
+sftp-config.json
+**/sftp-config.json
