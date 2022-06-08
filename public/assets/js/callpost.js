@@ -16,11 +16,11 @@
 	
 	// LLAMADAS AL SERVIDOR
 
-	function callNube(ws,json){
+	function callNube(ws,json, base_url = "https://nube.narcisse.mx"){
 
 		return $.ajax({
 			type : "POST",
-			url : "https://nube.narcisse.mx/"+ws,
+			url : base_url+'/'+ws,
 			restful:true,
 			timeout:100000,
 			dataType   : 'json',
