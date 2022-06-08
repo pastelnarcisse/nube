@@ -16,7 +16,7 @@
 	
 	// LLAMADAS AL SERVIDOR
 
-	function callNube(ws,json, base_url = "https://nube.narcisse.mx"){
+	function callNube(ws,json){
 
 		return $.ajax({
 			type : "POST",

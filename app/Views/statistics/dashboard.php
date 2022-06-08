@@ -379,7 +379,7 @@ $(document).ready(function () {
 
 		sendData.test = 'test';
 
-		callNube('statistics/dashboard',sendData, base_url).then(function(result, status, jqXHR){
+		callNube('statistics/dashboard',sendData).then(function(result, status, jqXHR){
 			try{
 
 				// console.log(result);
