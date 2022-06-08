@@ -5,9 +5,6 @@
 *      reporte de ventas
 **/
 
-/* global moment:false, Chart:false, Sparkline:false */
-
-
 
 /***********************************************/
 // FUNTION EVENTS
