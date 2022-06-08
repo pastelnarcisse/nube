@@ -400,7 +400,7 @@ $(document).ready(function () {
 					$(sumSalesResultID).html(result.sumSales.result);
 				}
 				
-
+				console.log('actualizado');
 
 			}catch(err){
 				console.log(err);

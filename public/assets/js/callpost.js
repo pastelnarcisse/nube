@@ -20,7 +20,7 @@
 
 		return $.ajax({
 			type : "POST",
-			url : "https://nube.narcisse.mx/"+ws,
+			url : base_url+'/'+ws,
 			restful:true,
 			timeout:100000,
 			dataType   : 'json',

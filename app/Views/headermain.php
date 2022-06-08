@@ -30,6 +30,10 @@
 	<!-- datatables -->
 	<link rel="stylesheet" href="<?=base_url('public/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css')?>">
 
+	<!-- GLOBAL JS -->
+	<script type="text/javascript">
+		var base_url = '<?=base_url();?>';
+	</script>
 
 	<!-- jQuery -->
 	<script src="<?=base_url('public/plugins/jquery/jquery.min.js')?>"></script>
