@@ -209,8 +209,6 @@
 </section>
 
 <script type="text/javascript">
-jQuery( function($){
-jQuery(window).on('load',function () {
 $(document).ready(function () {
 
 /***********************************************/
@@ -549,6 +547,4 @@ checklocalhost(idStores);
 	}
 
 });
-}); // END jQuery(window).on('load',function () {
-});	// END jQuery( function($){
 </script>

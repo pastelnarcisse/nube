@@ -543,8 +543,6 @@
 </section>
 
 <script type="text/javascript">
-jQuery( function($){
-jQuery(window).on('load',function () {
 $(document).ready(function () {
 
 
@@ -930,6 +928,4 @@ $(document).ready(function () {
 
 
 });
-}); // END jQuery(window).on('load',function () {
-});	// END jQuery( function($){
 </script>
