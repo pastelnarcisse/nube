@@ -156,8 +156,8 @@ class Operations extends BaseController
 
         if ($this->request->getJSON()) {
             $details = isset($this->request->getJSON()->details) ? $this->request->getJSON()->details : [] ;
-
-            $result = $this->inventary->setChangeStock($details);
+            $comment = isset($this->request->getJSON()->comment) ? $this->request->getJSON()->comment : [] ;
+            $result = $this->inventary->setChangeStock($details,$comment);
 
             return $this->respond($result, 200);
         }   

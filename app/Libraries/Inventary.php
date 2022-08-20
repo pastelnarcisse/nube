@@ -62,7 +62,7 @@ class Inventary
 	}
 
 
-	public function setChangeStock($details){
+	public function setChangeStock($details, $comment = 'Sin comentario'){
 
 		if (empty($details)) {
 			$this->errorMessage = 'Esta vacio los detalles de artículos';
@@ -83,7 +83,8 @@ class Inventary
 		$inventary_adjustment = array(
 			'adjustment_user' 	=> $adjustment_user,
 			'adjustment_date'	=> $adjustment_date,
-			'store_id' 			=> $store_id
+			'store_id' 			=> $store_id,
+			'comentario'		=> $comment
 		);
 
 		$invAdj = $this->nubeModel->saveInventaryAdjustment($inventary_adjustment);
