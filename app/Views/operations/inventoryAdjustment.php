@@ -1,7 +1,6 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 
 <script src="<?=base_url('public/assets/js/reports-sale.js?v=1.08')?>"></script>
-
 <div class="alert alert-warning d-none" role="alert" id="alertInfo">
   <span id="infoMessageAlert"></span>
 </div>
@@ -204,6 +203,42 @@
 					<!-- <button type="button" class="btn btn-primary" id="mbtn-Seleccionar">Seleccionar</button> -->
 				</div>
 			</div>
+		</div>
+	</div>
+</section>
+
+<section>
+	<!-- Modal -->
+	<div class="modal fade" id="modalMensaje" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" status="400">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Mensaje de servidor</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<span id="mensajeSpan">
+
+					</span>
+				</div>
+				<div class="modal-footer">
+					<button role="button" id="btn-cierre" type="button" class="btn btn-secondary" data-dismiss="modal">Cierra</button>
+
+					<a class="btn btn-primary" href="<?=base_url('operations/inventoryStatus')?>">
+						Lista de ajustes
+					</a>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section>
+	<div id="spinner-div" class="pt-5">
+		<div class="spinner-border text-primary" role="status">
 		</div>
 	</div>
 </section>
@@ -421,7 +456,7 @@ $('#btn-guardar').click(function(){
 	}else if(comentario == ''){
 		window.alert('No hay comentario');
 	}else {
-		setNewStock({details : data});
+		setNewStock({details : data, comment:comentario});
 	}
 
 
@@ -431,7 +466,7 @@ $('#btn-guardar').click(function(){
 	
 });
 
-// Doble click para eliminar row
+// Seleccionar row: se selecciona o deselecciona cada renglon al darle click
 $(addProduct_tbl+' tbody').on('click','tr',function(e){
  
     if ( $(this).hasClass('selected bg-secondary') ) {
@@ -444,10 +479,26 @@ $(addProduct_tbl+' tbody').on('click','tr',function(e){
 	
 });
 
-
+// Boton eliminar: se elimina cada renglón seleccionado
 $('#btn-deleteProduct').click( function () {
-	tbl_addProduct.row('.selected').remove().draw( false );
+	
+	sel = $('tr.selected').toArray();
+
+	sel.forEach(element => {
+		tbl_addProduct.row('.selected').remove().draw( false );
+	});
+
+	console.log(sel.length);
+	//tbl_addProduct.row('.selected').remove().draw( false );
 } );
+
+// AL cerrar modalMensaje
+$('#modalMensaje').on('hidden.bs.modal', function (e) {
+	status = $(this).attr('status');
+	if (status == '200' || status == 200) {
+		location.reload();
+	}
+})
 
 /***********************************************/
 // EJECUTAR
@@ -528,21 +579,40 @@ checklocalhost(idStores);
 
 	function setNewStock(sendData = {}){
 
+		$("#spinner-div").show();
+
 		sendData.test = 'test';
 
 		callNube('operations/inventoryAdjustment',sendData).then(function(result, status, jqXHR){
 			try{
 
 				console.log(result);
-
+				if (result.status == 200) {
+					$('#mensajeSpan').html('Se guardo exitosamente');
+					$("#modalMensaje").attr('status',200);
+				} else {
+					$('#mensajeSpan').html('No hay nada que guardar');
+					$("#modalMensaje").attr('status',401);
+				}
+				
+				$("#spinner-div").hide();
+				$('#modalMensaje').modal('show');
 
 			}catch(err){
+				$('#mensajeSpan').html('Error al guardar');
+				$("#modalMensaje").attr('status',400);
 				console.log(err);
+				$("#spinner-div").hide();
+				$('#modalMensaje').modal('show');
 			}
 		// }).done(function(data){
 		// 	// console.log(data);
 		}).fail(function(jqXHR, textStatus, errorThrown){
 			console.log(jqXHR);
+			$('#mensajeSpan').html('No se encontro servidor');
+			$("#modalMensaje").attr('status',404);
+			$("#spinner-div").hide();
+			$('#modalMensaje').modal('show');
 		});
 	}
 

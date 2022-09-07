@@ -2,9 +2,45 @@
 
 <script src="<?=base_url('public/assets/js/reports-sale.js?v=1.08')?>"></script>
 
-<div class="alert alert-warning d-none" role="alert" id="alertInfo">
-  <span id="infoMessageAlert"></span>
+
+<div id="alert-same" class="alert alert-warning alert-dismissible fade show d-none" role="alert">
+	<strong>Status ya guardado</strong> Recarga la página
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
 </div>
+
+
+<div id="alert-incomplete" class="alert alert-warning alert-dismissible fade show d-none" role="alert">
+	<strong>Se guardo incompleto</strong> Avisa a sistemas
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+
+<div id="alert-fail" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+	<strong>No guardo o error al guardar</strong> Avisar a sistemas
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+
+
+<div id="alert-status" class="alert alert-success alert-dismissible fade show d-none" role="alert">
+	<strong>Status completo</strong> Se guardo en servidor
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+
+<div id="alert-save" class="alert alert-success alert-dismissible fade show d-none" role="alert">
+	<strong>Se aplico</strong> Checar inventarios
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+
+
 
 <!-- Content Wrapper. Contains page content -->
 <div class="content">
@@ -38,22 +74,22 @@
 			<div class="col-sm-12">
 				
 				<div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
-					<?php if (array_search('addProduct',$permissions['actions'])): ?>
-					<button id="btn-addProduct" type="button" class="btn btn-secondary btn-action" value="addProduct" data-toggle="modal" data-target="#exampleModal">
+					<?php if (array_search('viewAdjustment',$permissions['actions'])): ?>
+					<button id="btn-findAjustment" type="button" class="btn btn-secondary btn-action" value="findAjustment">
 						<div class="icon">
 							<i class="ion ion-android-search"></i>
 						</div>
-						<small>AGREGAR ARTICULO</small>
+						<small>BUSCAR</small>
 					</button>	
 					<?php endif ?>
-					<?php //if (array_search('excel',$permissions['actions'])): ?>
+					<?php if (array_search('excel',$permissions['actions'])): ?>
 					<button id="btn-deleteProduct" type="button" class="btn btn-secondary btn-action" value="excel">
 						<div class="icon">
 							<i class="ion ion-clipboard"></i>
 						</div>
 						<small>QUITAR ARTICULOS</small>
 					</button>	
-					<?php //endif ?>
+					<?php endif ?>
 					<?php if (array_search('pdf',$permissions['actions'])): ?>
 					<button id="btn-pdf" type="button" class="btn btn-secondary btn-action" value="pdf">
 						<div class="icon">
@@ -110,12 +146,12 @@
 
 			<div class="col-sm-4 input-group">
 				<div class="input-group-prepend">
-					<label class="input-group-text" for="startDateGeneral">Fecha Inicial</label>
+					<label class="input-group-text" for="startDate">Fecha Inicial</label>
 				</div>
 				<input 
 					type="text" 
 					class="form-control datetimepicker-input" 
-					id="startDateGeneral" 
+					id="startDate" 
 					data-toggle="datetimepicker" 
 					data-target="#changeDateDashboard" 
 					value="<?=$startDate?>"
@@ -125,424 +161,744 @@
 
 			<div class="col-sm-4 input-group">
 				<div class="input-group-prepend">
-					<label class="input-group-text" for="finishDateGeneral">Fecha final</label>
+					<label class="input-group-text" for="finishDate">Fecha final</label>
 				</div>
 				<input 
 					type="text" 
 					class="form-control datetimepicker-input" 
-					id="finishDateGeneral" 
+					id="finishDate" 
 					data-toggle="datetimepicker" 
 					data-target="#changeDateDashboard" 
 					value="<?=$finishDate?>"
 					<?= array_search('selectDate',$permissions['actions']) ? '' : 'disabled' ?>
 				/>
 			</div>
+		</div>
 
+		<div class="row">
+			<div class="col-sm-4 input-group">
+				<div class="input-group-prepend">
+					<label class="input-group-text" for="startTime">Hora inicial</label>
+				</div>
+				<input 
+					type="text" 
+					class="form-control datetimepicker-input" 
+					id="startTime" 
+					data-toggle="datetimepicker" 
+					data-target="#changeDateDashboard" 
+					value="00:00"
+					<?= array_search('selectTime',$permissions['actions']) ? '' : 'disabled' ?>
+				/>
+			</div>
 
+			<div class="col-sm-4 input-group">
+				<div class="input-group-prepend">
+					<label class="input-group-text" for="finishTime">Hora final</label>
+				</div>
+				<input 
+					type="text" 
+					class="form-control datetimepicker-input" 
+					id="finishTime" 
+					data-toggle="datetimepicker" 
+					data-target="#changeDateDashboard" 
+					value="23:59"
+					<?= array_search('selectTime',$permissions['actions']) ? '' : 'disabled' ?>
+				/>
+			</div>
 		</div>
 		<!-- /.div row -->
 		<hr class="divider">
-		
 
+		<div class="row">
+			<div class="col-sm-3">
+				<div class="form-check">
+					<input 
+					class="form-check-input" 
+					type="checkbox" 
+					id="checkStore" 
+					value="option1" 
+					checked
+					<?= array_search('selectStore',$permissions['actions']) ? '' : 'disabled' ?>
+					/>
+					<label class="form-check-label" for="checkStore">Todas las sucursales</label>
+				</div>
+				
+			</div>
+			<div class="col-sm-1 border-right"></div>
+			
+			<div class="col-sm-8">
+				<div class="form-check">
+					<select id="mselectStore" multiple="multiple" class="form-control form-control-sm" disabled>
+						<?php foreach ($stores as $store): ?>
+						<option value="<?=$store->store_id?>" selected><?=$store->store_name?></option>	
+						<?php endforeach ?>		
+					</select>	
+				</div>	
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-sm-3">
+				<div class="form-check">
+					<input 
+					class="form-check-input" 
+					type="checkbox" 
+					id="checkStatusType" 
+					value="option3" 
+					<?= array_search('selectStatus',$permissions['actions']) ? '' : 'disabled' ?>
+					/>
+					<label class="form-check-label" for="checkStatusType">Todas formas de pago</label>
+				</div>
+			</div>
+			<div class="col-sm-1 border-right"></div>
+			<div class="col-sm-8">
+				<div class="form-check form-check-inline">
+					<input name = "checkStatus[]" class="form-check-input checkStatusType" type="checkbox" id="checkStatusCread" value="0" checked>
+					<label class="form-check-label" for="checkStatusCread">Creado</label>
+				</div>
+				<div class="form-check form-check-inline">
+					<input name = "checkStatus[]" class="form-check-input checkStatusType" type="checkbox" id="checkStatusCancel" value="-1" >
+					<label class="form-check-label" for="checkStatusCancel">Cancelado</label>
+				</div>
+				<div class="form-check form-check-inline">
+					<input name = "checkStatus[]" class="form-check-input checkStatusType" type="checkbox" id="checkStatusAccepted" value="1" checked>
+					<label class="form-check-label" for="checkStatusAccepted">Aceptado</label>
+				</div>
+				<div class="form-check form-check-inline">
+					<input name = "checkStatus[]" class="form-check-input checkStatusType" type="checkbox" id="checkStatusApplied" value="2">
+					<label class="form-check-label" for="checkStatusApplied">Aplicado</label>
+				</div>
+			</div>
+		</div>
+			
+				
 		<!-- /.div row -->
-
 	</div>
 
 </section>
 
-<!-- MODAL BUSQUEDA DE ARTÍCULOS -->
+<!-- SECTION TABLA -->
+<section class="content">
+	<div class="container-fluid">
+		<div class="row">
+			
+			<div class="col-12 table-responsive">
+				
+				<table class="table m-0" id="tbl-listInventary">
+					<thead>
+						<tr>
+							<th>FOLIO</th>
+							<th>SUCURSAL</th>
+							<th>FECHA</th>
+							<th>COMENTARIO</th>
+							<th>USUARIO</th>
+							<th>ESTADO</th>
+							<th>ACCIÓN</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+					<tfoot></tfoot>
+				</table>
+				<!-- /. tbl-stockStore -->
+			</div>
+			<!-- /.div col-12 table-responsive -->
+
+		</div>
+	</div>	
+</section>
+
 <section>
-	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<!-- Modal -->
+	<div class="modal fade" id="modalDetail" tabindex="-1" role="dialog" aria-labelledby="modalLabelDetail" aria-hidden="true" status="400">
 		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="exampleModalLabel">Buscar artículo</h5>
+					<h5 class="modal-title" id="modalLabelDetail">Lista de artículo</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
+						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
 				<div class="modal-body">
-					<div class="row">
-						<div class="col-6">
-							<input type="text" name="findItem" id="in-findItem">
-						</div>
-						<div class="col-6">
-							<button type="button" class="btn btn-primary" id="mbtn-Seleccionar">Buscar artículo</button>
-						</div>
-
-					</div>
-					<div class="row">
-						<div class="col-12 table-responsive">
-
-						
-							<table class="table table-striped table-hover responsive" id="tbl-findProduct" style="width : 100%;">
-								<thead>
-									<tr>
-										<th>ID</th>
-										<th>SUCURSAL</th>
-										<th>ARTICULO</th>
-										<th>CLAVE</th>
-										<th class="text-right">EXISTENCIA</th>
-										<th>UNIDAD</th>
-									</tr>
-								</thead>
-								<tbody></tbody>
-								<tfoot></tfoot>
-							</table>
-							<!-- /. tbl-findProduct -->
-						</div>
-
-					</div>
-
+					<h2>Folio: <span id="folioSpan"></span></h2>
+					<h2>Mensaje: <span id="mensajeSpan"></span></h2>
+					<h3>Sucursal: <span id="sucursalSpan"></span></h3>
+					<table class="table m-0" id="tbl-listAdjustmentDetail">
+						<thead>
+							<tr>
+								<th>ARTICULO</th>
+								<th>CLAVE</th>
+								<th>CANTIDAD AJUSTE</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+						<tfoot></tfoot>
+					</table>
 					
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-					<!-- <button type="button" class="btn btn-primary" id="mbtn-Seleccionar">Seleccionar</button> -->
+					<button role="button" id="btn-aceptar" class='d-none btn btn-primary btn-status' status="1" id_adjustment = "">Aceptar</button>
+					<button role="button" id="btn-cancelar" class='d-none btn btn-danger btn-status' status="-1" id_adjustment = "">Cancelar</button>
+					<button role="button" id="btn-aplicar" class='d-none btn btn-primary btn-status' status="2" id_adjustment = "">Aplicar</button>
+					<button role="button" id="btn-cierre" type="button" class="btn btn-secondary" data-dismiss="modal">Cierra</button>
+
 				</div>
 			</div>
 		</div>
 	</div>
 </section>
 
+<!-- LOADING -->
+
+<section>
+	<div id="spinner-div" class="pt-5">
+		<div class="spinner-border text-primary" role="status">
+		</div>
+	</div>
+</section>
+
+
 <script type="text/javascript">
-$(document).ready(function () {
+
 
 /***********************************************/
 // VALUES
 /***********************************************/
 
-	// ID de tabla de inventarios por sucursal
-	var addProduct_tbl 				= '#tbl-addProduct';
+// ID de tabla de inventarios por sucursal
+const findAjustment_id			= '#btn-findAjustment';
 
-	var findProduct_tbl				= '#tbl-findProduct';
+const startDate_input			= '#startDate';
+const finishDate_input			= '#finishDate';
+const startTime_input			= '#startTime';
+const finishTime_input			= '#finishTime';
+const selectStore_id			= '#mselectStore';
+const checkStore_id 			= '#checkStore';
+const selectStatus_class		= '.checkStatusType';
+const selectStatus_id			= '#checkStatusType';
+const tblList_id 				= '#tbl-listInventary';
+const tblListDetail_id			= '#tbl-listAdjustmentDetail';
+const modalDetail_id			= '#modalDetail';
+const btnAceptar_id				= '#btn-aceptar';
+const btnCancelar_id			= '#btn-cancelar';
+const btnAplicar_id				= '#btn-aplicar';
+const btnStatus_class			= '.btn-status';
+const idAdjustemnt_attr			= 'id_adjustment';
+const loading_id 				= '#spinner-div';
+//SPAN
+const folioSpan_id				= '#folioSpan';
+const mensajeSpan_id			= '#mensajeSpan';
+const sucursalSpan_id			= '#sucursalSpan';
+//ALERT
+const alertIncomplete_id		= "#alert-incomplete";
+const alertFail_id				= "#alert-fail";
+const alertStatus_id			= "#alert-status";
+const alertSave_id				= "#alert-save";
+const alertSame_id				= "alert-same";
 
-	var inputWord 					= '#in-findItem';
+const formatterNumber 			= new Intl.NumberFormat('es-MX');
+//SUCURSALES POR PHP
+const stores 					= <?=json_encode($stores)?>;
 
-	var formatterNumber = new Intl.NumberFormat('es-MX');
+var idStores 					= [];
 
-	var stores = <?=json_encode($stores)?>;
+let status 					= [];
 
-	var idStores = [];
+// Objeto datatable || INVENTARIOS POR CATEGORIA
+let tbl_listDetail		= $(tblListDetail_id).DataTable({
+	language : { url : '//cdn.datatables.net/plug-ins/1.11.3/i18n/es_es.json'},
+	columns: [
+		{ data: 'articulo' },
+		{ data: 'clave' },
+		{ data: 'ajuste' }
+	],
+	order: [[ 0, "desc" ]],
+	dom: 'Bfrtip',
+	//buttons: buttonsStockStore(),
+	info : false,
+	ordering : true,
+	searching: false,
+	paging: true,
+	pageLength: 50,
+	processing : true
+
+});
+
+// Objeto datatable || INVENTARIOS POR CATEGORIA
+let tbl_list		= $(tblList_id).DataTable({
+	language : { url : '//cdn.datatables.net/plug-ins/1.11.3/i18n/es_es.json'},
+	columns: [
+		{ data: 'folio' },
+		{ data: 'sucursal' },
+		{ data: 'fecha' },
+		{ data: 'comentario'},
+		{ data: 'usuario'},
+		{ data: 'estado', render: function (data, type, row, meta) {
+			var ret = 'DESCONOCIDO';
+			switch (data) {
+				case -1 :
+				case '-1':
+					ret = '<span class="text-danger">CANCELADO</span>';	
+					break;
+				case 0 :
+				case '0':
+					ret = '<span class="text-primary">CREADO</span>';	
+					break;
+				case 1 :
+				case '1':
+					ret = '<span class="text-success">ACEPTADO</span>';	
+					break;
+				case 2 :
+				case '2':
+					ret = '<span class="text-secondary">APLICADO</span>';	
+					break;
+				default:
+					break;
+			} return ret} 
+
+		},
+		{ data: 'accion', render: function (data, type, row, meta) {
+
+			var button = '<button role="button" id="btn-ver" type="button" class="btn btn-secondary btn-sm btn-ver" onClick="getListDetail('+row.folio+');">Ver</button>';
+			
+			if (data == 0 || data == '0') {
+				button += '<button role="button" type="button" class="btn btn-primary btn-sm btn-status" id_adjustment="'+row.folio+'" status="1">Aceptar</button>';
+				button += '<button role="button" type="button" class="btn btn-danger btn-sm btn-status" id_adjustment="'+row.folio+'" status="-1">Cancelar</button>';
+			}
+
+			if (data == 1 || data == '1') {
+				button += '<button role="button" type="button" class="btn btn-primary btn-sm btn-status" id_adjustment="'+row.folio+'" status="2">Aplicar</button>';
+			}
+			
+			// var myTemp = document.querySelector(".btn-ver");
+			// myTemp.innerHTML;
+			return button },
+		}
+	],
+	order: [[ 0, "desc" ]],
+	dom: 'Bfrtip',
+	//buttons: buttonsStockStore(),
+	info : false,
+	ordering : true,
+	searching: true,
+	paging: true,
+	pageLength: 50,
+	processing : true
+
+});
+
+$(function () {
+
 
 /***********************************************/
 // OPTIONS
 /***********************************************/
-	// Objeto datatable || INVENTARIOS POR CATEGORIA
-	var tbl_addProduct		= $(addProduct_tbl).DataTable({
-		language : { url : '//cdn.datatables.net/plug-ins/1.11.3/i18n/es_es.json'},
-		columns: [
-			{ 	data: 'art_id', 
-				className: 'd-none', 
-				title : 'ID',
-				name : 'art_id'
-			},
-			{ 	data: 'sucursal', 
-				className: 'd-none', 
-				title : 'SUCURSAL',
-				name : 'sucursal'
-			},
-			{ 	data: 'articulo', 
-				title : 'ARTÍCULO',
-				name : 'articulo'
-			},
-			{ 	data: 'clave', 
-				title : 'CLAVE',
-				name : 'clave'
-			},
-			{ 	data: 'ajustar', 
-				render: function (data, type, row, meta){
-					return '<input class="text-right ajustar" id="input-'+row.clave+'" clave="'+row.clave+'" type="number" value="'+data+'">';
-				},
-				title : 'AJUSTAR',
-				name : 'ajustar'
-			},			
-			{ 	data: 'existencia_actual', 
-				render: function (data, type, row, meta){
-					return '<span id="stock-'+row.clave+'" existencia="'+data+'">'+formatterNumber.format(data)+'</span>';
-				},
-				className: 'text-right',
-				title : 'EXISTENCIA ACTUAL',
-				name : 'existencia_actual'
-
-			},
-			{ 	data: 'nueva_existencia', 
-				render: function (data, type, row, meta){
-
-					class_color = row.nueva_existencia > row.existencia_actual ? 'text-primary' : row.nueva_existencia < row.existencia_actual ? 'text-danger' : '';
-
-					return '<span class="'+class_color+'" id="span-'+row.clave+'" existencia="'+data+'">'+formatterNumber.format(data)+'</span>';
-				},
-				className: 'text-right',
-				title : 'NUEVA EXISTENCIA',
-				name : 'nueva_existencia'
-
-			},
-			{ 	data: 'unidad', 
-				title : 'UNIDAD',
-				name : 'unidad'
-			},
-		],
-		order: [[ 3, "desc" ]],
-		info : false,
-		ordering : true,
-		searching: false,
-		paging: true,
-		pageLength: 50,
-		processing : true
-
+	// Fecha inicial general
+	$(startDate_input).datetimepicker({
+		format: 'YYYY-MM-DD',
+		locale: 'es'
 	});
 
-		// Objeto datatable || INVENTARIOS POR CATEGORIA
-	var tbl_findProduct	= $(findProduct_tbl).DataTable({
-		language : { url : '//cdn.datatables.net/plug-ins/1.11.3/i18n/es_es.json'},
-		columns: [
-			{ 	data: 'art_id', 
-				className: 'd-none', 
-				title : 'ID',
-				name : 'art_id'
-			},
-			{ data: 'sucursal', className: "d-none"},
-			{ data: 'articulo'},
-			{ data: 'clave'},
-			{ data: 'existencia', render: function (data, type, row, meta) {
-				return formatterNumber.format(data); }, className: "text-right", type: "num-fmt"
-			},
-			{ data: 'unidad'}
-		],
-		order: [[ 3, "desc" ]],
-		info : false,
-		ordering : true,
-		searching: false,
-		paging: true,
-		lengthChange: false,
-		pageLength: 10,
-		processing : true
+	// Fecha final general
+	$(finishDate_input).datetimepicker({
+		format: 'YYYY-MM-DD',
+		locale: 'es'
+	});
 
+	// Fecha inicial general
+	$(startTime_input).datetimepicker({
+		format: 'HH:mm',
+		locale: 'es'
+	});
+
+	// Fecha final general
+	$(finishTime_input).datetimepicker({
+		format: 'HH:mm',
+		locale: 'es'
+	});
+
+	// Selección de categorías Stock
+	$(selectStore_id).multipleSelect({
+		locale : 'es-MX',
+		sellectAll : true,
+		multipleWidth : 200,
+		styler: function (row) {
+			if (row.type === 'optgroup') {
+				return 'color: #ffffff; font-weight: normal; background-color: #6c757d;'
+			}
+		},
+		filter : true
 	});
 
 
-	$.each(stores, function(index, store){
-		idStores.push(store.store_id);
-	});
+	/***********************************************/
+	// EJECUTAR
+	/***********************************************/
+	checklocalhost(idStores);
 
+	sendData = infoForm();
+
+	getList(sendData, tbl_list);
+
+});
 
 
 /***********************************************/
 // EVENTS
 /***********************************************/
 
-// Buscar la palabra por ajax
-$('#mbtn-Seleccionar').on('click',function(event){
+	//BUSCAR POR LOS FILTROS
+	$(findAjustment_id).click(function(){
+		sendData = infoForm();
+		getList(sendData, tbl_list);
+	});
 
-	word = $(inputWord).val();
+	// Click al check de tipo pago general
+	$( selectStatus_id ).on( 'click', function() {
+		if( $(this).is(':checked') ){
+			// Hacer algo si el checkbox ha sido seleccionado
+			$(selectStatus_class).prop( "disabled", true );
+			$(selectStatus_class).prop( "checked", true );
+		} else {
+			// Hacer algo si el checkbox ha sido deseleccionado
+			$(selectStatus_class).prop( "disabled", false );
+		}
+	});
 
-	findProdutByWord(word);
-
-});
-
-// Doble click para agregarlo a la tabla de agregar artículos.
-$(findProduct_tbl).on('dblclick','tr',function(e){
- 
-    add_product = tbl_findProduct.row(this).data();
-	
-    if ($('#input-'+add_product.clave).length == 0) {
-
-    	input_clave = "input-"+add_product.clave;
-    	span_clave	= "span-"+add_product.clave;
-
-		add_product.ajustar = 0;
-		add_product.existencia = parseFloat(add_product.existencia);
-		add_product.DT_RowId = 'dt-'+add_product.clave;
-		add_product.existencia_actual = add_product.existencia;
-		add_product.nueva_existencia = add_product.existencia;
-
-		tbl_addProduct.row.add(add_product).draw();
-    }
-
-	
-});
-
-// Actualiza los datos
-$(addProduct_tbl).on('input','td',function(e){
-    
-    data = tbl_addProduct.row(this).data();
-
-    cell_info = tbl_addProduct.cell( this ).index();
-
-    if (cell_info.column == 4) {
-
-    	existencia_actual = data.existencia_actual;
-
-    	suma_ajuste = $('#input-'+data.clave).val() == '' ? 0 : parseFloat($('#input-'+data.clave).val());
-
-    	nueva_existencia = existencia_actual + suma_ajuste;
-
-    	tbl_addProduct.cell(cell_info.row, 6 ).data(nueva_existencia);
-    }
-
-    
-});
-
-// 
-$('#btn-guardar').click(function(){
-
-	inputs = [];
-
-	isPositiveStock = true;
-
-	$('.ajustar').each(function(index, item){
-
-		console.log(index);
-
-		row = index;
-		column_ajustar = 4;
-		column_nuevaExistencia = 6;
-
-		ajustar = parseFloat($(this).val());
-
-		tbl_addProduct.cell(row, column_ajustar).data(ajustar);
-		nueva_existencia = tbl_addProduct.cell(row, column_nuevaExistencia).data();
-
-		isPositiveStock = nueva_existencia >= 0 ? isPositiveStock : false;
-
+	// Click al check de tiendas general
+	$( checkStore_id ).on( 'click', function() {
+		if( $(this).is(':checked') ){
+			// Hacer algo si el checkbox ha sido seleccionado
+			$(selectStore_id).multipleSelect('disable');
+			$(selectStore_id).multipleSelect('checkAll');
+		} else {
+			// Hacer algo si el checkbox ha sido deseleccionado
+			$(selectStore_id).multipleSelect('enable');
+		}
 	});
 
 
-	data = tbl_addProduct.rows().data().toArray();
+/**
+ * Se ejecuta de nuevo los eventos dentro de esta función.
+ * 
+ */
+function reloadEvent() {
+	
+	$(btnStatus_class).on('click',function(){
 
-	comentario = $('#input_comentario').val();
+		data = {};
 
-	if (!isPositiveStock) {
-		window.alert('Tienes inventario negativo');
-	}else if(comentario == ''){
-		window.alert('No hay comentario');
-	}else {
-		setNewStock({details : data});
+		data.idAdjustment = $(this).attr('id_adjustment');
+		data.status = $(this).attr('status');
+
+		setStatus(data);
+
+	});
+
+}
+
+
+
+
+//*********************************************************************************************//
+// FUNCIONES LOCALES
+//*********************************************************************************************//
+
+/**
+ * 
+ * 
+ * @return Objetos de datos de envío
+ * */
+function infoForm(){
+
+	status = [];
+
+	$(selectStatus_class).each(function(){
+		if ($(this).is(':checked')) {
+			status.push($(this).val());
+		}
+		
+	});
+
+	info = {
+		start_date 				: $(startDate_input).val(),
+		finish_date 			: $(finishDate_input).val(),
+		start_time 				: $(startTime_input).val(),
+		finish_time 			: $(finishTime_input).val(),
+		adjustmentStartdate 	: $(startDate_input).val() + ' '+$(startTime_input).val(),
+		adjustmentFinishdate 	: $(finishDate_input).val() + ' '+$(finishTime_input).val(),
+		storesId				: $(selectStore_id).multipleSelect('getSelects'),
+		status 					: status
 	}
 
+	console.log(info);
 
+	return info;
+
+}
+
+/**
+ * Dibuja los nuevos datos de la tabla
+ * 
+ */
+function drawTableList(data){
+
+	tbl_list.clear();
+
+	var tmp = data.map(function (item) {
+		var thing = {
+			folio			: '?',
+			sucursal 		: '?',
+			fecha 			: '0000-00-00',
+			comentario 		: '?',
+			usuario			: '?',
+			estado			: '?',
+			accion			: '?'
+		};
+
+		thing.folio			= item.id;
+		thing.sucursal 		= item.store_name;
+		thing.fecha			= item.adjustment_date;
+		thing.comentario	= item.comentario;
+		thing.usuario 		= item.adjustment_user;
+		thing.estado		= item.status;
+		thing.accion		= item.status;
+
+		return thing;
+	});
+
+	tbl_list.rows.add(tmp).draw();
+
+}
+
+function drawTableDetail(data){
 	
+	tbl_listDetail.clear();
 
-	console.log(data);
+	var tmp = data.map(function (item) {
+		var thing = {
+			articulo		: '?',
+			clave 			: '?',
+			ajuste 			: '-'
+		};
+
+		thing.articulo		= item.descripcion;
+		thing.clave 		= item.clave;
+		thing.ajuste		= item.ajuste;
+
+		return thing;
+	});
+
+	tbl_listDetail.rows.add(tmp).draw();
+
+}
+
+
+//*********************************************************************************************//
+// FUNCIONES POST - AJAX
+//*********************************************************************************************//
+
+function checklocalhost(idStores){
+
+
+	callLocal('app/getStore',{stores:idStores}).then(function(result, status, jqXHR){
+		try{
+
+
+		if (result.code == 400) {
+			//$('#btn-addProduct').prop('disabled', true);
+		}
+
+		}catch(err){
+			console.log(err);
+		}
+
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log(jqXHR);
+	});
+}
+
+/**
+ * Dame la lista de inventarios y dibuja la lista
+ * @param sendData object 
+ */
+function getList(sendData = {}){
+
+	$("#spinner-div").show();
+
+	sendData.functionName = 'getListInventary';
+
+
+	callNube('operations/inventoryStatus',sendData).then(function(result, status, jqXHR){
+		try{
+
+			console.log(result);
+			drawTableList(result.object);
+			reloadEvent();
+
+			$("#spinner-div").hide();
+
+		}catch(err){
+
+			console.log(err);
+
+			$("#spinner-div").hide();
+
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+
+		console.log(jqXHR);
+		$("#spinner-div").hide();
+	});
+
+}
+
+
+/**
+ * Trar la lista de articulos para mostrarlos en una tabla
+ * @param idAdjustment int id de lista de ajuste
+ */
+function getListDetail(idAdjustment){
 	
-});
+	$("#spinner-div").show();
 
-// Doble click para eliminar row
-$(addProduct_tbl+' tbody').on('click','tr',function(e){
- 
-    if ( $(this).hasClass('selected bg-secondary') ) {
-		$(this).removeClass('selected bg-secondary');
-	}
-	else {
-		tbl_addProduct.$('tr.selected bg-secondary').removeClass('selected bg-secondary');
-		$(this).addClass('selected bg-secondary');
-	}
-	
-});
+	sendData.functionName = 'getListInventaryDetail';
+	sendData.idAdjustment = idAdjustment;
 
+	callNube('operations/inventoryStatus',sendData).then(function(result, status, jqXHR){
+		try{
 
-$('#btn-deleteProduct').click( function () {
-	tbl_addProduct.row('.selected').remove().draw( false );
-} );
+			console.log(result);
 
-/***********************************************/
-// EJECUTAR
-/***********************************************/
-checklocalhost(idStores);
-
-//*********************************************************************************************//
-// FUNCIONES LOCALEs
-//*********************************************************************************************//
-
-//*********************************************************************************************//
-// FUNCIONES POST
-//*********************************************************************************************//
-
-	function checklocalhost(idStores){
-
-
-		callLocal('app/getStore',{stores:idStores}).then(function(result, status, jqXHR){
-			try{
-
-
-				if (result.code == 400) {
-					$('#btn-addProduct').prop('disabled', true);
-				}
-
-
-			}catch(err){
-				console.log(err);
+			if (result.object.status == 0 || result.object.status == '0') {
+				$(btnAceptar_id).removeClass('d-none');
+				$(btnCancelar_id).removeClass('d-none');
+				$(btnAplicar_id).addClass('d-none');
 			}
-		// }).done(function(data){
-		// 	// console.log(data);
-		}).fail(function(jqXHR, textStatus, errorThrown){
-			console.log(jqXHR);
-		});
-	}
 
-	function findProdutByWord(word){
+			if (result.object.status == 1 || result.object.status == '1') {
+				$(btnAceptar_id).addClass('d-none');
+				$(btnCancelar_id).addClass('d-none');
+				$(btnAplicar_id).removeClass('d-none');
+			}
 
+			drawTableDetail(result.objects);
 
-		callLocal('app/getProductsByWord',{word:word}).then(function(result, status, jqXHR){
-			try{
+			//LLENADO DE INFORMACION AL MODAL
+			
+			$(btnStatus_class).attr('id_adjustment',idAdjustment);
 
-				console.log(result);
-				tbl_findProduct.clear();
+			$(sucursalSpan_id).html(result.object.store_name);
 
-				var tmp = result.object.map(function (item) {
-					var thing = {
-						art_id			: 0,
-						sucursal		: '?',
-						articulo 		: '?',
-						clave 			: 0,
-						existencia 		: 0,
-						unidad		 	: 0
-					};
+			$(mensajeSpan_id).html(result.object.comentario);
 
-					thing.art_id		= item.art_id;
-					thing.sucursal		= item.sucursal;
-					thing.articulo 		= item.descripcion;
-					thing.clave 		= item.clave;
-					thing.existencia	= item.existencia;
-					thing.unidad		= item.unidad;
+			$(folioSpan_id).html(result.object.id);
 
+			$(modalDetail).modal('show');
 
-					return thing;
-				});
+			$("#spinner-div").hide();
 
-				row = tbl_findProduct.rows.add(tmp).draw();
+		}catch(err){
+
+			console.log(err);
+
+			$("#spinner-div").hide();
+
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+
+		console.log(jqXHR);
+		$("#spinner-div").hide();
+	});
+}
+
+/**
+ * Trar la lista de articulos para mostrarlos en una tabla
+ * @param idAdjustment int id de lista de ajuste
+ */
+function setStatus(sendData){
+	
+	$("#spinner-div").show();
+
+	sendData.functionName 	= 'adjustmentStatus';
+
+	console.log(sendData);
+
+	callNube('operations/inventoryStatus',sendData).then(function(result, status, jqXHR){
+		try{
+
+			console.log(result);
+
+			if (result.code == 200) {
+
+				$(alertSave_id).removeClass('d-none');
 				
-			}catch(err){
-				console.log(err);
+				$(alertSave_id).delay(4000).slideUp(200, function() {
+					$(this).addClass('d-none');
+				});
 			}
-		// }).done(function(data){
-		// 	// console.log(data);
-		}).fail(function(jqXHR, textStatus, errorThrown){
-			console.log(jqXHR);
-		});
-	}
 
-	function setNewStock(sendData = {}){
-
-		sendData.test = 'test';
-
-		callNube('operations/inventoryAdjustment',sendData).then(function(result, status, jqXHR){
-			try{
-
-				console.log(result);
-
-
-			}catch(err){
-				console.log(err);
+			if	(result.status == 200){
+				
+				$(alertStatus_id).removeClass('d-none');
+				
+				$(alertStatus_id).delay(4000).slideUp(200, function() {
+					$(this).addClass('d-none');
+				});
 			}
-		// }).done(function(data){
-		// 	// console.log(data);
-		}).fail(function(jqXHR, textStatus, errorThrown){
-			console.log(jqXHR);
-		});
-	}
 
-});
+			if (result.status != 200 && result.code != 200 ) {
+				$(alertIncomplete_id).removeClass('d-none');
+				
+				$(alertIncomplete_id).delay(4000).slideUp(200, function() {
+					$(this).addClass('d-none');
+				});
+			}
+
+			sendData = infoForm();
+
+			getList(sendData, tbl_list);
+
+			$("#spinner-div").hide();
+
+		}catch(err){
+
+			if (err.status == 401) {
+
+				$(alertSame_id).removeClass('d-none');
+			
+				$(alertSame_id).delay(4000).slideUp(200, function() {
+					$(this).addClass('d-none');
+				});
+				
+			}else{
+
+				$(alertFail_id).removeClass('d-none');
+			
+				$(alertFail_id).delay(4000).slideUp(200, function() {
+					$(this).addClass('d-none');
+				});
+			}
+
+			console.log(err);
+
+			$("#spinner-div").hide();
+
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+
+		$(alertFail_id).removeClass('d-none');
+			
+		$(alertFail_id).delay(4000).slideUp(200, function() {
+			$(this).addClass('d-none');
+		});
+
+		console.log(jqXHR);
+		$("#spinner-div").hide();
+	});
+}
+
+
+
+
 
 </script>

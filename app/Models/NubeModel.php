@@ -207,7 +207,7 @@ class NubeModel
 			$this->status(200);
 			return $this->response;
 			
-		} catch (Exception $e) {
+		} catch (\Throwable $e) {
 			$this->error($e);
 			$this->status(400);
 			return $this->response;
@@ -244,7 +244,240 @@ class NubeModel
 			$this->status(200);
 			return $this->response;
 			
-		} catch (Exception $e) {
+		} catch (\Throwable $e) {
+			$this->error($e);
+			$this->status(400);
+			return $this->response;
+		}
+
+	}
+
+	/**
+	 * Dame inventario
+	 *
+	 * @param array $data arreglo con structura de la base de datos
+	 *
+	 * @return array|boolean
+	 * @author Chununo
+	 */
+	public function getInventaryListByStore($stores = false, $startDate = false, $finishDate = false, $status = false)	{
+		$this->triggerEvents('setInventaryListByStore');
+
+		if (!$stores || !$startDate || !$finishDate || !$status) {
+			$this->error('No se envio nada');
+			$this->status(401);
+			return $this->response;
+		}
+
+		$this->objects($stores);
+
+		try {
+
+			$builder = $this->db->table('inventory_adjustment');
+			$builder->join('store', 'store.store_id = inventory_adjustment.store_id', 'left');
+			$builder->whereIn('inventory_adjustment.store_id',$stores);
+			$builder->whereIn('inventory_adjustment.status',$status);
+			$builder->where('adjustment_date >=',$startDate);
+			$builder->where('adjustment_date <=',$finishDate);
+			$builder->select('inventory_adjustment.*');
+			$builder->select('store.store_name');
+			//$query = $builder->get();
+			$result = $builder->get()->getResult();
+
+			$this->message('EXITOSO') ;
+			$this->object($result);
+			$this->status(200);
+			return $this->response;
+			
+		} catch (\Throwable $e) {
+			$this->error($e);
+			$this->status(400);
+			return $this->response;
+		}
+
+	}
+
+		/**
+	 * Dame inventario por id
+	 *
+	 * @param array $data arreglo con structura de la base de datos
+	 *
+	 * @return array|boolean
+	 * @author Chununo
+	 */
+	public function getInventaryById($id = false)	{
+		$this->triggerEvents('getInventaryById');
+
+		if (!$id) {
+			$this->error('No se envio nada');
+			$this->status(401);
+			return $this->response;
+		}
+
+		try {
+
+			$builder = $this->db->table('inventory_adjustment');
+			$builder->join('store', 'store.store_id = inventory_adjustment.store_id', 'left');
+			$builder->where('id',$id);
+			$builder->select('inventory_adjustment.*');
+			$builder->select('store.store_name');
+			$result = $builder->get()->getRow();
+
+			
+			$this->message('EXITOSO') ;
+			$this->object($result);
+			$this->status(200);
+			return $this->response;
+			
+		} catch (\Throwable $e) {
+			$this->error($e);
+			$this->status(400);
+			return $this->response;
+		}
+
+	}
+
+	/**
+	 * Dame la lista detallada de un ajuste
+	 *
+	 * @param array $data arreglo con structura de la base de datos
+	 *
+	 * @return array|boolean
+	 * @author Chununo
+	 */
+	public function getListInventaryDetailById($idAjustem = false)	{
+		$this->triggerEvents('getListInventaryDetailById');
+
+		if (!$idAjustem) {
+			$this->error('No se envio nada');
+			$this->status(401);
+			return $this->response;
+		}
+
+
+		try {
+
+			$builder = $this->db->table('inventory_adjustment_detail');
+			$builder->where('id_inventory_adjustment',$idAjustem);
+			$result = $builder->get()->getResult();
+
+			$this->getInventaryById($idAjustem);
+			$this->message('EXITOSO');
+			$this->objects($result);
+			$this->status(200);
+			return $this->response;
+			
+		} catch (\Throwable $e) {
+			$this->error($e);
+			$this->status(400);
+			return $this->response;
+		}
+
+	}
+
+	/**
+	 * Dame el status
+	 *
+	 * @param array $data arreglo con structura de la base de datos
+	 *
+	 * @return array|boolean
+	 * @author Chununo
+	 */
+	public function getStatus($id)	{
+		$this->triggerEvents('setStatusInventary');
+
+		if (empty($id)) {
+			$this->error('No se envio nada');
+			$this->status(401);
+			return $this->response;
+		}
+
+
+		try {
+
+			$builder = $this->db->table('inventory_adjustment');
+			$builder->select('status');
+			$builder->where('id',$id);
+			$result = $builder->get()->getRow();
+
+			$this->message('EXITOSO');
+			$this->object($result);
+			$this->status(200);
+			return $this->response;
+			
+		} catch (\Throwable $e) {
+			$this->error($e);
+			$this->status(400);
+			return $this->response;
+		}
+
+	}
+
+	/**
+	 * Dame la lista detallada de un ajuste
+	 *
+	 * @param array $data arreglo con structura de la base de datos
+	 *
+	 * @return array|boolean
+	 * @author Chununo
+	 */
+	public function setStatusInventary($id, $status_id = null)	{
+		$this->triggerEvents('setStatusInventary');
+
+		if (empty($status_id)) {
+			$this->error('No se envio nada');
+			$this->status(401);
+			return $this->response;
+		}
+
+
+		try {
+
+			$builder = $this->db->table('inventory_adjustment');
+			$builder->where('id',$id);
+			$result = $builder->update(['status'=>$status_id]);
+
+			$this->message('EXITOSO');
+			$this->objects($result);
+			$this->status(200);
+			return $this->response;
+			
+		} catch (\Throwable $e) {
+			$this->error($e);
+			$this->status(400);
+			return $this->response;
+		}
+
+	}
+
+		/**
+	 * Dame la lista detallada de un ajuste
+	 *
+	 * @param array $data arreglo con structura de la base de datos
+	 *
+	 * @return array|boolean
+	 * @author Chununo
+	 */
+	public function setApplicated($id, $applied_date, $applied_user, $ain_id)	{
+		$this->triggerEvents('setStatusInventary');
+
+		try {
+
+			$builder = $this->db->table('inventory_adjustment');
+			$builder->where('id',$id);
+			$result = $builder->update([
+				'status'		=> 2,
+				'applied_date' 	=> $applied_date,
+				'applied_user'	=> $applied_user,
+				'ain_id'		=> $ain_id
+			]);
+
+			$this->message('EXITOSO');
+			$this->objects($result);
+			$this->status(200);
+			return $this->response;
+			
+		} catch (\Throwable $e) {
 			$this->error($e);
 			$this->status(400);
 			return $this->response;
@@ -269,7 +502,11 @@ class NubeModel
 		$this->response['object'] = $object;
 	}
 
-	public function objects($object){
+	public function objects($objects){
 		$this->response['objects'] = $objects;
+	}
+
+	public function callHook(){
+
 	}
 }

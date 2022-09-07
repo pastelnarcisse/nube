@@ -62,7 +62,7 @@ class Inventary
 	}
 
 
-	public function setChangeStock($details){
+	public function setChangeStock($details, $comment = 'Sin comentario'){
 
 		if (empty($details)) {
 			$this->errorMessage = 'Esta vacio los detalles de artículos';
@@ -83,7 +83,8 @@ class Inventary
 		$inventary_adjustment = array(
 			'adjustment_user' 	=> $adjustment_user,
 			'adjustment_date'	=> $adjustment_date,
-			'store_id' 			=> $store_id
+			'store_id' 			=> $store_id,
+			'comentario'		=> $comment
 		);
 
 		$invAdj = $this->nubeModel->saveInventaryAdjustment($inventary_adjustment);
@@ -118,6 +119,80 @@ class Inventary
 
 		return $invAdj;
 	}
+
+
+	public function getListInventary($storesId = [],$startDate = false, $finishDate = false, $status = []){
+		
+		//$storesId = $this->ionAuth->getStoresID();
+
+		$list = $this->nubeModel->getInventaryListByStore($storesId, $startDate, $finishDate, $status);
+		$list['stores'] = $storesId;
+
+		return $list;
+
+	}
+
+	public function getListInventaryDetailById($idAdjustment){
+		
+		//$storesId = $this->ionAuth->getStoresID();
+
+		$list = $this->nubeModel->getListInventaryDetailById($idAdjustment);
+
+		return $list;
+
+	}
+
+		/**
+	 * Se acepta el ajuste de inventario
+	 */
+	public function getStatus($id = false){
+		if (!$id) {
+			return false;
+		}
+
+		$res = $this->nubeModel->getStatus($id);
+
+		return $res['object']->status;
+	}
+
+
+	/**
+	 * Se acepta el ajuste de inventario
+	 */
+	public function setInventaryAcepted($id = false){
+		if (!$id) {
+			return false;
+		}
+
+		return $this->nubeModel->setStatusInventary($id, 1);
+	}
+
+	/**
+	 * Se cancela el ajuste de inventario
+	 */
+	public function setInventaryCanceled($id = false){
+		if (!$id) {
+			return false;
+		}
+
+		return $this->nubeModel->setStatusInventary($id, -1);
+	}
+
+	/**
+	 * Se cancela el ajuste de inventario
+	 */
+	public function setInventaryAplicate($id = false, $ain_id){
+		if (!$id) {
+			return false;
+		}
+
+		$applied_user = $this->ionAuth->getUserId();
+		$applied_date = date('Y-m-d H:m:s');
+
+		return $this->nubeModel->setApplicated($id, $applied_date, $applied_user, $ain_id);
+	}
+
+
 
 
 	public function getErrorMessagge(){
