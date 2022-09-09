@@ -473,7 +473,7 @@ class NubeModel
 			]);
 
 			$this->message('EXITOSO');
-			$this->objects($result);
+			$this->object($result);
 			$this->status(200);
 			return $this->response;
 			

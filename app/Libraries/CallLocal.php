@@ -62,7 +62,7 @@ class CallLocal{
 		$curl = curl_init();
 
 		curl_setopt_array($curl, array(
-			CURLOPT_URL => 'localhost/replicador/ws/'.$this->ws,
+			CURLOPT_URL => 'http://localhost/replicador/ws/'.$this->ws,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_ENCODING => '',
 			CURLOPT_MAXREDIRS => 10,
@@ -76,7 +76,16 @@ class CallLocal{
 			),
 		));
 
-		$response = json_decode(curl_exec($curl));
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+
+		if (curl_errno($curl)) { 
+			return curl_error($curl); 
+		} 
+
+
+		$response = curl_exec($curl);
+	
 
 		curl_close($curl);
 

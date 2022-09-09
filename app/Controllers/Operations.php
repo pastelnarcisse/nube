@@ -199,6 +199,8 @@ class Operations extends BaseController
 
 			$input = $this->request->getJSON();
 
+			$idAdjustment = $input->idAdjustment;
+
 			$result = [];
 
 			// Dame los inventarios
@@ -208,7 +210,7 @@ class Operations extends BaseController
 
 			// Dame los datalles del inventario
 			if ($input->functionName == 'getListInventaryDetail') {
-				$result = isset($input->idAdjustment) ? $this->inventary->getListInventaryDetailById($input->idAdjustment) : [] ;
+				$result = isset($idAdjustment) ? $this->inventary->getListInventaryDetailById($idAdjustment) : [] ;
 			}
 
 			// Se envia status
@@ -216,9 +218,7 @@ class Operations extends BaseController
 				
 				try {
 					
-					$statusActual =  $this->inventary->getStatus($input->idAdjustment);
-
-					$idAdjustment = $input->idAdjustment;
+					$statusActual =  $this->inventary->getStatus($idAdjustment);
 
 					// Si el status enviado y el actual son iguales, manda error
 					if (intval($statusActual) == intval($input->status)) {
@@ -239,23 +239,23 @@ class Operations extends BaseController
 					if ($input->status == 2 || $input->status == '2') {
 
 						// Datos de inventario
-						$data = isset($input->idAdjustment) ? $this->inventary->getListInventaryDetailById($input->idAdjustment) : [] ;
-						// llamada local
-						$call =  new \App\Libraries\CallLocal('app/setAjusteInventario',$data);
-						// Aplicar ajuste de inventario y dame respuesta
-						$result = $call->response();
+						$data = isset($idAdjustment) ? $this->inventary->getListInventaryDetailById($idAdjustment) : [] ;
 
-						if ($result->code == 200) {
-							$ain_id = $result->object->ain_id;
-							// Se guarda la actualizacion de inventario en nube
-							$result->setInventaryAplicate = $this->inventary->setInventaryAplicate($idAdjustment, $ain_id);
-						}
+						$result = $data;
+
 					}
 				} catch (\Throwable $th) {
 					return $this->respond((object)$th, 400);
 				}
 
-				
+			}
+
+			if ($input->functionName == 'adjustmentApplied') {
+
+				$ain_id = $input->ain_id;
+
+				$result = $this->inventary->setInventaryAplicate($idAdjustment, $ain_id);
+
 			}
 
 			return $this->respond((object)$result, 200);

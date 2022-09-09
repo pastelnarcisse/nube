@@ -630,7 +630,7 @@ function infoForm(){
 		status 					: status
 	}
 
-	console.log(info);
+	//console.log(info);
 
 	return info;
 
@@ -731,7 +731,7 @@ function getList(sendData = {}){
 	callNube('operations/inventoryStatus',sendData).then(function(result, status, jqXHR){
 		try{
 
-			console.log(result);
+			//console.log(result);
 			drawTableList(result.object);
 			reloadEvent();
 
@@ -754,7 +754,7 @@ function getList(sendData = {}){
 
 
 /**
- * Trar la lista de articulos para mostrarlos en una tabla
+ * Traer la lista de articulos para mostrarlos en una tabla
  * @param idAdjustment int id de lista de ajuste
  */
 function getListDetail(idAdjustment){
@@ -767,7 +767,7 @@ function getListDetail(idAdjustment){
 	callNube('operations/inventoryStatus',sendData).then(function(result, status, jqXHR){
 		try{
 
-			console.log(result);
+			//console.log(result);
 
 			if (result.object.status == 0 || result.object.status == '0') {
 				$(btnAceptar_id).removeClass('d-none');
@@ -812,7 +812,7 @@ function getListDetail(idAdjustment){
 }
 
 /**
- * Trar la lista de articulos para mostrarlos en una tabla
+ * Se envia el status nuevo al ajuste.
  * @param idAdjustment int id de lista de ajuste
  */
 function setStatus(sendData){
@@ -821,21 +821,20 @@ function setStatus(sendData){
 
 	sendData.functionName 	= 'adjustmentStatus';
 
-	console.log(sendData);
+	//console.log(sendData);
 
 	callNube('operations/inventoryStatus',sendData).then(function(result, status, jqXHR){
 		try{
 
-			console.log(result);
+			//console.log(result);
 
-			if (result.code == 200) {
+			// Si status es 2, entonces guardamos la informacion de 
+			if (sendData.status == 2) {
 
-				$(alertSave_id).removeClass('d-none');
+				saveAdjustment(result);
 				
-				$(alertSave_id).delay(4000).slideUp(200, function() {
-					$(this).addClass('d-none');
-				});
 			}
+
 
 			if	(result.status == 200){
 				
@@ -844,6 +843,10 @@ function setStatus(sendData){
 				$(alertStatus_id).delay(4000).slideUp(200, function() {
 					$(this).addClass('d-none');
 				});
+
+				sendData = infoForm();
+
+				getList(sendData);
 			}
 
 			if (result.status != 200 && result.code != 200 ) {
@@ -854,9 +857,7 @@ function setStatus(sendData){
 				});
 			}
 
-			sendData = infoForm();
-
-			getList(sendData, tbl_list);
+			
 
 			$("#spinner-div").hide();
 
@@ -891,6 +892,82 @@ function setStatus(sendData){
 		$(alertFail_id).delay(4000).slideUp(200, function() {
 			$(this).addClass('d-none');
 		});
+
+		console.log(jqXHR);
+		$("#spinner-div").hide();
+	});
+}
+
+// Guarda Ajuste en Sicar 
+function saveAdjustment(data){
+
+	idAdjustment = data.object.id;
+
+	callLocal('app/setAjusteInventario',data).then(function(result, status, jqXHR){
+		try{
+
+			if (result.code == 200) {
+
+				$(alertSave_id).removeClass('d-none');
+				
+				$(alertSave_id).delay(4000).slideUp(200, function() {
+					$(this).addClass('d-none');
+				});
+
+				ain_id = result.object.ain_id;
+
+				setAdjustmentApplied(idAdjustment, ain_id);
+			}
+
+			//console.log(result);
+
+		}catch(err){
+			console.log(err);
+		}
+
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log(jqXHR);
+	});
+}
+
+// Cambiar status de aplicado en nube
+function setAdjustmentApplied(idAdjustment, ain_id){
+	
+	$("#spinner-div").show();
+
+	sendData.functionName 	= 'adjustmentApplied';
+	sendData.idAdjustment 	= idAdjustment;
+	sendData.ain_id 		= ain_id;
+
+	callNube('operations/inventoryStatus',sendData).then(function(result, status, jqXHR){
+		try{
+
+			//console.log(result);
+
+			if	(result.status == 200){
+				
+				$(alertStatus_id).removeClass('d-none');
+				
+				$(alertStatus_id).delay(4000).slideUp(200, function() {
+					$(this).addClass('d-none');
+				});
+
+				sendData = infoForm();
+
+				getList(sendData);
+
+			}
+
+			$("#spinner-div").hide();
+
+		}catch(err){
+
+			console.log(err);
+
+			$("#spinner-div").hide();
+
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
 
 		console.log(jqXHR);
 		$("#spinner-div").hide();
