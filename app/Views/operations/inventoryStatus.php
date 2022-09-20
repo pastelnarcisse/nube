@@ -40,6 +40,19 @@
 	</button>
 </div>
 
+<div id="alert-server" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+	<strong>No hay servidor</strong> Avisa a sistemas
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+
+<div id="alert-store" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+	<strong>No es tu sucursal</strong> 
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
 
 
 <!-- Content Wrapper. Contains page content -->
@@ -336,9 +349,15 @@
 					
 				</div>
 				<div class="modal-footer">
+					<?php if (array_search('btnAccept',$permissions['actions'])): ?>
 					<button role="button" id="btn-aceptar" class='d-none btn btn-primary btn-status' status="1" id_adjustment = "">Aceptar</button>
+					<?php endif ?>
+					<?php if (array_search('btnCancel',$permissions['actions'])): ?>
 					<button role="button" id="btn-cancelar" class='d-none btn btn-danger btn-status' status="-1" id_adjustment = "">Cancelar</button>
+					<?php endif ?>
+					<?php if (array_search('btnApply',$permissions['actions'])): ?>
 					<button role="button" id="btn-aplicar" class='d-none btn btn-primary btn-status' status="2" id_adjustment = "">Aplicar</button>
+					<?php endif ?>
 					<button role="button" id="btn-cierre" type="button" class="btn btn-secondary" data-dismiss="modal">Cierra</button>
 
 				</div>
@@ -399,11 +418,17 @@ const formatterNumber 			= new Intl.NumberFormat('es-MX');
 //SUCURSALES POR PHP
 const stores 					= <?=json_encode($stores)?>;
 
-var idStores 					= [];
+const permissions				= Object.values(<?=json_encode($permissions['actions'])?>);
 
-let status 					= [];
+let idStores 					= [];
 
-// Objeto datatable || INVENTARIOS POR CATEGORIA
+let status 						= [];
+
+$.each(stores, function(index, store){
+	idStores.push(store.store_id);
+});
+
+// Objeto datatable || x|INVENTARIOS POR CATEGORIA
 let tbl_listDetail		= $(tblListDetail_id).DataTable({
 	language : { url : '//cdn.datatables.net/plug-ins/1.11.3/i18n/es_es.json'},
 	columns: [
@@ -458,19 +483,41 @@ let tbl_list		= $(tblList_id).DataTable({
 		},
 		{ data: 'accion', render: function (data, type, row, meta) {
 
-			var button = '<button role="button" id="btn-ver" type="button" class="btn btn-secondary btn-sm btn-ver" onClick="getListDetail('+row.folio+');">Ver</button>';
+			btnDisabled = 'disabled';
+
+			if (row.store_id == row.storeId) {
+				btnDisabled = '';
+			}
+			
+			btnNoneView = btnNoneAccept = btnNoneCancel = btnNoneApply = 'd-none';
+
+			if (permissions.includes('btnView')){
+				btnNoneView = "";
+			}
+
+			if (permissions.includes('btnAccept')){
+				btnNoneAccept = "";
+			}
+
+			if (permissions.includes('btnCancel')){
+				btnNoneCancel = "";
+			}
+
+			if (permissions.includes('btnApply')){
+				btnNoneApply = "";
+			}
+
+			var button = '<button role="button" id="btn-ver" type="button" class="btn btn-secondary btn-sm btn-ver '+btnNoneView+'" onClick="getListDetail('+row.folio+','+row.storeId+');">Ver</button>';
 			
 			if (data == 0 || data == '0') {
-				button += '<button role="button" type="button" class="btn btn-primary btn-sm btn-status" id_adjustment="'+row.folio+'" status="1">Aceptar</button>';
-				button += '<button role="button" type="button" class="btn btn-danger btn-sm btn-status" id_adjustment="'+row.folio+'" status="-1">Cancelar</button>';
+				button += '<button role="button" type="button" class="btn btn-primary btn-sm btn-status '+btnNoneAccept+'" id_adjustment="'+row.folio+'" status="1">Aceptar</button>';
+				button += '<button role="button" type="button" class="btn btn-danger btn-sm btn-status '+btnNoneCancel+'" id_adjustment="'+row.folio+'" status="-1">Cancelar</button>';
 			}
 
 			if (data == 1 || data == '1') {
-				button += '<button role="button" type="button" class="btn btn-primary btn-sm btn-status" id_adjustment="'+row.folio+'" status="2">Aplicar</button>';
+				button += '<button role="button" type="button" class="btn btn-primary btn-sm btn-status '+btnNoneApply+'" id_adjustment="'+row.folio+'" status="2" '+btnDisabled+'>Aplicar</button>';
 			}
 			
-			// var myTemp = document.querySelector(".btn-ver");
-			// myTemp.innerHTML;
 			return button },
 		}
 	],
@@ -533,11 +580,9 @@ $(function () {
 	/***********************************************/
 	// EJECUTAR
 	/***********************************************/
-	checklocalhost(idStores);
+	checklocalhost();
 
-	sendData = infoForm();
 
-	getList(sendData, tbl_list);
 
 });
 
@@ -640,7 +685,7 @@ function infoForm(){
  * Dibuja los nuevos datos de la tabla
  * 
  */
-function drawTableList(data){
+function drawTableList(data, storeId){
 
 	tbl_list.clear();
 
@@ -652,7 +697,8 @@ function drawTableList(data){
 			comentario 		: '?',
 			usuario			: '?',
 			estado			: '?',
-			accion			: '?'
+			accion			: '?',
+			storeId			: 0
 		};
 
 		thing.folio			= item.id;
@@ -662,7 +708,8 @@ function drawTableList(data){
 		thing.usuario 		= item.adjustment_user;
 		thing.estado		= item.status;
 		thing.accion		= item.status;
-
+		thing.store_id		= parseInt(item.store_id);
+		thing.storeId		= storeId;
 		return thing;
 	});
 
@@ -697,11 +744,19 @@ function drawTableDetail(data){
 // FUNCIONES POST - AJAX
 //*********************************************************************************************//
 
-function checklocalhost(idStores){
+function checklocalhost(){
 
 
 	callLocal('app/getStore',{stores:idStores}).then(function(result, status, jqXHR){
 		try{
+
+			console.log(result);
+
+			sendData = infoForm();
+
+			storeId = parseInt(result.object);
+
+			getList(sendData, storeId);
 
 
 		if (result.code == 400) {
@@ -713,6 +768,8 @@ function checklocalhost(idStores){
 		}
 
 	}).fail(function(jqXHR, textStatus, errorThrown){
+
+
 		console.log(jqXHR);
 	});
 }
@@ -721,7 +778,7 @@ function checklocalhost(idStores){
  * Dame la lista de inventarios y dibuja la lista
  * @param sendData object 
  */
-function getList(sendData = {}){
+function getList(sendData = {}, storeId){
 
 	$("#spinner-div").show();
 
@@ -732,7 +789,7 @@ function getList(sendData = {}){
 		try{
 
 			//console.log(result);
-			drawTableList(result.object);
+			drawTableList(result.object, storeId);
 			reloadEvent();
 
 			$("#spinner-div").hide();
@@ -757,7 +814,7 @@ function getList(sendData = {}){
  * Traer la lista de articulos para mostrarlos en una tabla
  * @param idAdjustment int id de lista de ajuste
  */
-function getListDetail(idAdjustment){
+function getListDetail(idAdjustment, storeId){
 	
 	$("#spinner-div").show();
 
@@ -768,6 +825,14 @@ function getListDetail(idAdjustment){
 		try{
 
 			//console.log(result);
+
+			store_id = parseInt(result.object.store_id);
+
+			$(btnAplicar_id).prop('disabled', true);
+
+			if (store_id == storeId) {
+				$(btnAplicar_id).prop('disabled', false);
+			}
 
 			if (result.object.status == 0 || result.object.status == '0') {
 				$(btnAceptar_id).removeClass('d-none');
